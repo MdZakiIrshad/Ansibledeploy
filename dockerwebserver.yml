@@ -1,0 +1,36 @@
+- name: configure and run Docker Container with httpd
+  hosts: all
+  become: yes
+
+  tasks: 
+    - name: Install Docker 
+      yum: 
+       name: docker 
+       state: present
+
+    - name: Start and enable Docker Service
+      service: 
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: pull httpd image from Docker Hub
+      community.docker.docker_image:
+         name: httpd:latest
+         source: pull
+
+    - name: Run the httpd docker container:
+      community.docker.docker_container:
+          name: my_httpd
+          image: httpd:latest
+          ports: 
+            - "80:80"
+          volumes: 
+            - /var/www/html:/usr/local/apache2/htdocs
+         state: started
+
+     - name: copy the html code 
+       copy: 
+         src: index.html
+         dest: /var/www/html
+          
